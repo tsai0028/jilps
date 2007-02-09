@@ -63,11 +63,23 @@ public class Cop4JVectorSparse extends AbstractCop4JVector implements Iterable<D
   public Iterable<Cop4JVectorEntry> getNonZeroValues() {
     return new Iterable<Cop4JVectorEntry>() {
       public Iterator<Cop4JVectorEntry> iterator() {
-        return index2entry.values().iterator();
+    	  	return index2entry.values().iterator();	
+        
       }
     };
   }
 
+  public Iterable<Integer> getNonZeroIndicies() {
+	    return new Iterable<Integer>() {
+	      public Iterator<Integer> iterator() {
+	    	  	ArrayList<Integer> keys = new ArrayList<Integer>(index2entry.keySet());
+	    	  	Collections.sort(keys);
+	    	  	return keys.iterator();
+	        
+	      }
+	    };
+	  }  
+  
   public List<Double> asList() {
     return null;
   }
@@ -81,8 +93,40 @@ public class Cop4JVectorSparse extends AbstractCop4JVector implements Iterable<D
     Cop4JVectorEntry entry = index2entry.get(index);
     return entry == null ? 0.0 : entry.value;
   }
+  
+  public void setValue(int index, double value) {
+	  //Cop4JVectorEntry entry = index2entry.get(index);
+	  index2entry.put(index, new Cop4JVectorEntry(index,value));
+
+  }
 
   public void extend(int size) {
     this.size += size;
+  }
+  
+  public Cop4JVector copy() {
+	  ArrayList<Integer> indicies = new ArrayList<Integer>();
+	  ArrayList<Double> values = new ArrayList<Double>();
+	  for (Cop4JVectorEntry entry : this.getNonZeroValues()) {
+		  indicies.add(entry.getIndex());
+		  values.add(entry.getValue());
+	  }
+	  int[] vi = new int[indicies.size()];
+	  double[] vx = new double[values.size()];
+	  for (int i = 0; i < indicies.size(); i++) {
+		  vi[i] = indicies.get(i);
+		  vx[i] = values.get(i);
+	  }
+	  Cop4JVectorSparse result = new Cop4JVectorSparse(this.getDimension(), vi, vx);
+	  return result;
+  }
+  
+  public String toString() {
+	  String result = "";
+	  for (Double value : this) {
+		  result = result + value.toString() + " ";
+	  }
+	  return result;
+	  
   }
 }
